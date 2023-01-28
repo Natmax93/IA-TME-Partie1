@@ -20,9 +20,12 @@ def lec_pref_etu(nom_fic):
     mat = []
     
     for i in range(1, len(contenu)):
-        mat.append(contenu[i].split())
-        mat[i-1].pop(0)
-        mat[i-1].pop(0)
+        liste_tmp = contenu[i].split()
+        liste_tmp.pop(0)
+        liste_tmp.pop(0)
+        for j in range(len(liste_tmp)):
+            liste_tmp[j] = int(liste_tmp[j])
+        mat.append(liste_tmp)
         
     return mat
 
@@ -40,9 +43,12 @@ def lec_pref_spe(nom_fic):
     mat = []
     
     for i in range(2, len(contenu)):
-        mat.append(contenu[i].split())
-        mat[i-2].pop(0)
-        mat[i-2].pop(0)
+        liste_tmp = contenu[i].split()
+        liste_tmp.pop(0)
+        liste_tmp.pop(0)
+        for j in range(len(liste_tmp)):
+            liste_tmp[j] = int(liste_tmp[j])
+        mat.append(liste_tmp)
         
     return mat
 
@@ -58,7 +64,22 @@ def get_capacite(nom_fic):
     
     liste = contenu[1].split()
     liste.pop(0)
+    for j in range(len(liste)):
+        liste[j] = int(liste[j])
     return liste
+
+def interne_libre(matEtu, statutsEtu):
+    """
+    Fonction qui cherche et retourne un étudiant non affecté
+    qui n'a pas demandé à tous les parcours.
+    Retourne -1 si aucun étudiant à été trouvé. 
+    """
+    
+    # Parcours des étudiants
+    for etu in range(len(matEtu)):
+        if len(matEtu[etu]) > 0 and statutsEtu[etu] == False:
+            return etu
+    return -1
 
 def GaleShapley_CE(fic_etu, fic_spe):
     """
@@ -82,30 +103,41 @@ def GaleShapley_CE(fic_etu, fic_spe):
     statutsEtu = dict()
     for i in range(len(matEtu)):
         statutsEtu[i] = False
+       
+    # On boucle tant qu'il y a un étudiant non affecté qui n'a pas demandé
+    # à tous les parcours
+    etu = interne_libre(matEtu, statutsEtu)
+    while etu != -1:
         
-    # Parcours de la matrice des étudiants
-    etu = 0
-    for prefs in matEtu:
-        spe = prefs.pop(0)
-        if capaciteSpe[spe] > 0:
-            capaciteSpe[spe] -= 1
+        # Specialite en tete de la liste de l'etu courant
+        speDemandee = matEtu[etu].pop(0)
+        if speDemandee not in mariage:
+            mariage[speDemandee] = set()
+        # La specialite a de la place
+        if len(mariage[speDemandee]) < capaciteSpe[speDemandee]:
+            # On ajoute l'étudiant
+            mariage[speDemandee].add(etu)
             statutsEtu[etu] = True
+        # Sinon on regarde si la spécialité ne préfère pas l'etu courant
+        # à un etu qu'elle a déjà
         else:
-            # On cherche un étudiant qui est moins préféré par la spécialité
-            # que l'étudiant courant
-            dernier = mariage[spe][0]
-            place = 0
-            
-            for i in range(1, len(mariage[spe]) - 1):
-                affecte = mariage[spe][i]
-                if matSpe[spe][affecte] < matSpe[spe][dernier]:
-                    dernier = affecte
-                    place = i
-                    
-            if matSpe[spe][dernier] < matSpe[spe][etu]:
-                mariage[spe][place] = etu
-                statutsEtu[etu] = True
-                statutsEtu[dernier] = False
-        etu += 1
+            # Parcours de la liste de préférences de la spécialité du pire
+            # au meilleur
+            i = len(matSpe[speDemandee])-1
+            while i>0:
+                etuCur = matSpe[speDemandee][i]
+                if etuCur == etu:
+                    break
+                if etuCur in mariage[speDemandee]:
+                    mariage[speDemandee].remove(etuCur)
+                    mariage[speDemandee].add(etu)
+                    statutsEtu[etuCur] = False
+                    statutsEtu[etu] = True
+                    break
+                i -= 1
+
+        etu = interne_libre(matEtu, statutsEtu)
+    
+    return mariage
 
     
