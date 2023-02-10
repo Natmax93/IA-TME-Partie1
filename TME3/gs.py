@@ -81,13 +81,12 @@ def interne_libre(matEtu, statutsEtu):
             return etu
     return -1
 
-def GaleShapley_CE_ite(fic_etu, fic_spe):
+def GaleShapley_CE(fic_etu, fic_spe):
     """
-    Retourne le nombre d'itérations pour un mariage parfait et stable côté
-    étudiant.
+    Retourne un mariage parfait et stable côté étudiant sous forme
+    d'ensemble de couple.
     """
     
-    cpt = 0
     mariage = dict()
     matEtu = lec_pref_etu(fic_etu)
     matSpe = lec_pref_spe(fic_spe)
@@ -109,8 +108,7 @@ def GaleShapley_CE_ite(fic_etu, fic_spe):
     # à tous les parcours
     etu = interne_libre(matEtu, statutsEtu)
     while etu != -1:
-        #compteur d'itérations pour question 8
-        cpt+=1
+        
         # Specialite en tete de la liste de l'etu courant
         speDemandee = matEtu[etu].pop(0)
         if speDemandee not in mariage:
@@ -140,7 +138,7 @@ def GaleShapley_CE_ite(fic_etu, fic_spe):
 
         etu = interne_libre(matEtu, statutsEtu)
     
-    return cpt
+    return mariage
 
 def specialite_non_pleine(matSpe, capaciteSpe, mariage):
     """

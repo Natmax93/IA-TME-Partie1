@@ -109,7 +109,7 @@ def trace_courbe_temps_calcul(mini, maxi, gs):
 
     assert mini < maxi
 
-    while mini<maxi:
+    while mini<=maxi:
         temps_calcul_GS(mini, tabx, taby, gs)
         mini += 200
 
@@ -117,6 +117,49 @@ def trace_courbe_temps_calcul(mini, maxi, gs):
     plt.ylabel("tmp")
     plt.plot(tabx,taby)
     plt.show()
+    
+def nb_iterations_GS(n, tabx, taby, gs):
+    """
+    Calcul le temps de notre algo GS pour un nombre n d'étudiants pour 10
+    tests différents et écrit le
 
+    Parameters
+    ----------
+    n : TYPE
+        Le nombre d'étudiant pour le test.
 
-trace_courbe_temps_calcul(200, 2000, gs.GaleShapley_CE)
+    Returns
+    -------
+    le temps
+
+    """
+    cpt = 0
+    for i in range(10):
+        init_tab_pref_etu(n)
+        init_tab_pref_master(n)
+        cpt += gs("PrefEtuGen.txt", "PrefSpeGen.txt")
+
+    tabx.append(n)
+    taby.append(cpt/10)
+
+def trace_courbe_temps_calcul_ite(mini, maxi, gs):
+
+    tabx = []
+    taby = []
+
+    assert mini < maxi
+
+    while mini<=maxi:
+        nb_iterations_GS(mini, tabx, taby, gs)
+        mini += 200
+        
+    print("tabx = " + str(tabx))
+    print("taby = " + str(taby))
+
+    plt.xlabel("n")
+    plt.ylabel("ite")
+    plt.plot(tabx,taby)
+    plt.show()
+    
+"""trace_courbe_temps_calcul(200, 2000, gs.GaleShapley_CE)"""
+trace_courbe_temps_calcul_ite(200, 2000, gs.GaleShapley_CE_ite)
