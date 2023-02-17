@@ -27,11 +27,16 @@ def pl_generator_equity_k(fichierEtu, fichierSpe, nom_fichier, k):
     
     dicoSpe = dict()
     dicoEtu = dict()
-    variables = set()
+    variables = []
     capacites = gs.get_capacite(fichierSpe)
     
-    fichier.write("Maximize\n")
-    fichier.write("obj: ")
+    # Initialisation des capacités des spécialités
+    for spe in range(len(matSpe)):
+        dicoSpe[spe] = []
+        
+    # Initialisation des étudiants
+    for etu in range(len(matEtu)):
+        dicoEtu[etu] = []
     
     for etu in range(len(matEtu)):
         # On parcourt les spécialités qui sont dans les k premiers
@@ -44,7 +49,7 @@ def pl_generator_equity_k(fichierEtu, fichierSpe, nom_fichier, k):
             if estPref(etu, listeSpe, k):
                 # On crée une nouvelle variable pour le PL qui correspond au
                 # couple etu-spe courant
-                variables.add("x" + str(etu) + "_" + str(spe))
+                variables.append("x" + str(etu) + "_" + str(spe))
                 # dictionnaire stockant les etudiants à leur spe dans
                 dicoSpe[spe].append(etu)
                 dicoEtu[etu].append(spe)
@@ -66,7 +71,7 @@ def pl_generator_equity_k(fichierEtu, fichierSpe, nom_fichier, k):
         
     # Contraintes
     
-    fichier.write("Subject To\n")
+    fichier.write("\nSubject To\n")
     
     # Contraintes sur la capacité des hôpitaux
     i = 1
@@ -78,7 +83,7 @@ def pl_generator_equity_k(fichierEtu, fichierSpe, nom_fichier, k):
             for j in range(1, len(dicoSpe[spe])):
                 fichier.write(" + " + "x" + str(dicoSpe[spe][j]) + "_" + str(spe))
                 
-        fichier.write(" <= " + capacites[spe] + "\n")
+            fichier.write(" <= " + str(capacites[spe]) + "\n")
     
     # Contraintes pour l'unicité
     for etu in range(len(dicoEtu)):
@@ -88,12 +93,12 @@ def pl_generator_equity_k(fichierEtu, fichierSpe, nom_fichier, k):
             fichier.write("x" + str(dicoEtu[etu][0]) + "_" + str(spe) )
             for j in range(1, len(dicoEtu[etu])):
                 fichier.write(" + " + "x" + str(dicoEtu[etu][j]) + "_" + str(spe))
-        fichier.write(" <= 1\n")
+            fichier.write(" <= 1\n")
     
     fichier.write("Binary\n")
     for var in variables:
         fichier.write(var + " ")
-    fichier.write("\nEnd")
+    fichier.write("\nEnd\n")
     
     
     fichier.close()
